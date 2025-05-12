@@ -12,10 +12,13 @@ class Agent:
         self.velocity = np.zeros(2)                           # 当前速度指令，初始化为0
         self.color_str = color_str
         self.target = np.zeros(2)
+        self.history_points = []
+
 
     def update(self, dt=0.1):
         # 简单的位置更新
         self.position += self.velocity * dt
+        self.history_points.append(self.position.copy())
 
     def update_vel(self, velocity: np.ndarray):
         self.velocity = velocity
@@ -26,6 +29,10 @@ class Agent:
     def prefer_vel(self):
         vel_ = self.target - self.position
         return vel_[0], vel_[1]
+
+    def get_hist_traj(self):
+        hist_traj = np.vstack(self.history_points)
+        return hist_traj
 
 
 class Obstacle:
@@ -93,8 +100,8 @@ for i in range(total_steps):
     # 使用for循环绘制圆圈
     for j in range(len(agents)):
         ax.scatter(
-            agents[j].position[0],
-            agents[j].position[1],
+            agents[j].get_hist_traj()[:, 0],
+            agents[j].get_hist_traj()[:, 1],
             s=agents[j].radius,
             c=agents[j].color_str,
             edgecolors='black',
